@@ -2,6 +2,7 @@ import os
 
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
+from sqlalchemy.engine.url import make_url
 
 load_dotenv()
 
@@ -17,8 +18,6 @@ if DATABASE_URL:
         print(i, ord(c), repr(c))
 
 DATABASE_URL = DATABASE_URL.strip()
-
-from sqlalchemy.engine.url import make_url
 
 print("=" * 50)
 print(make_url(DATABASE_URL))
