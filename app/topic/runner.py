@@ -22,9 +22,7 @@ class TopicRunner:
 
         self.service = TopicService()
 
-    # =====================================================
     # Topic Modeling
-    # =====================================================
 
     def run(self):
 
@@ -65,40 +63,18 @@ class TopicRunner:
             documents.append(text)
             news_mapping.append(news)
 
-        # ==========================================
-        # DEBUG DOCUMENT
-        # ==========================================
-
-        print("=" * 60)
-        print("SAMPLE DOCUMENTS")
-        print("=" * 60)
-
-        for i, doc in enumerate(documents[:10]):
-
-            print(f"[{i}]")
-            print(doc)
-            print("-" * 60)
-
-        # ==========================================
         # Topic Modeling
-        # ==========================================
-
+        
         topics, topic_mapping = self.service.process(
             documents
         )
-
-        # ==========================================
-        # DEBUG DISTRIBUTION
-        # ==========================================
 
         print("=" * 60)
         print("Distribusi Topic")
         print("=" * 60)
         print(Counter(topics))
 
-        # ==========================================
         # Simpan Topic
-        # ==========================================
 
         for topic_number, info in topic_mapping.items():
 
@@ -114,7 +90,7 @@ class TopicRunner:
 
             if topic is None:
 
-                topic = self.topic_repository.create_topic(
+                self.topic_repository.create_topic(
 
                     bertopic_topic_id=topic_number,
 
@@ -144,37 +120,54 @@ class TopicRunner:
 
                 )
 
-        # ==========================================
-        # Update news_processed
-        # ==========================================
+        # Pastikan Topic -1 (Lainnya) ada
 
-        for news, topic_number in zip(
-            news_mapping,
-            topics,
-        ):
+        other_topic = self.topic_repository.get_by_bertopic_id(-1)
+
+        if other_topic is None:
+
+            other_topic = self.topic_repository.create_topic(
+
+                bertopic_topic_id=-1,
+
+                label="Lainnya",
+
+                category="Lainnya",
+
+                keywords="",
+
+                representative_docs="",
+
+            )
+            
+        # Update news_processed
+
+        for news, topic_number in zip(news_mapping, topics):
+
+            # ----------------------------
+            # Outlier
+            # ----------------------------
 
             if topic_number == -1:
+
+                self.news_repository.update_topic(
+                    news.raw_news_id,
+                    other_topic.id,
+                )
+
                 continue
 
             topic = self.topic_repository.get_by_bertopic_id(
                 topic_number
             )
 
-            print("=" * 60)
-            print(f"News ID      : {news.id}")
-            print(f"Raw News ID  : {news.raw_news_id}")
-            print(f"BERTopic ID  : {topic_number}")
-            print(f"Topic Object : {topic}")
-
             if topic is None:
                 continue
 
-            updated = self.news_repository.update_topic(
+            self.news_repository.update_topic(
                 news.raw_news_id,
                 topic.id,
             )
-
-            print(f"Update Result: {updated}")
 
         print()
 
