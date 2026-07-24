@@ -8,8 +8,6 @@ class TrendRunner:
 
     def __init__(self, db):
 
-        self.db = db
-
         self.news_repository = NewsProcessedRepository(db)
 
         self.trend_repository = TopicTrendRepository(db)
@@ -22,13 +20,20 @@ class TrendRunner:
         print("TREND ANALYSIS")
         print("=" * 60)
 
-        news = self.news_repository.get_all_processed()
+        recent_news = self.news_repository.get_recent_processed(days=7)
 
-        print(f"Total News : {len(news)}")
+        previous_news = self.news_repository.get_previous_processed(
+            start_days=14,
+            end_days=7,
+        )
 
-        trends = self.service.process(news)
+        print(f"Recent News   : {len(recent_news)}")
+        print(f"Previous News : {len(previous_news)}")
 
-        print(f"Topic ditemukan : {len(trends)}")
+        trends = self.service.process(
+            recent_news,
+            previous_news,
+        )
 
         for trend in trends:
 
@@ -39,32 +44,21 @@ class TrendRunner:
             if existing is None:
 
                 self.trend_repository.create_trend(
-
                     topic_id=trend["topic_id"],
-
                     news_count=trend["news_count"],
-
                     growth_rate=trend["growth_rate"],
-
                     trend_score=trend["trend_score"],
-
                 )
 
             else:
 
                 self.trend_repository.update_trend(
-
                     topic_id=trend["topic_id"],
-
                     news_count=trend["news_count"],
-
                     growth_rate=trend["growth_rate"],
-
                     trend_score=trend["trend_score"],
-
                 )
 
         print("=" * 60)
         print("TREND SELESAI")
         print("=" * 60)
-        print(f"Trend dihitung : {len(trends)} topic")

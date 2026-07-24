@@ -9,30 +9,49 @@ class TrendService:
 
         self.score = TrendScore()
 
-    def process(self, news_list):
+    def process(self, recent_news, previous_news):
 
-        grouped = defaultdict(list)
+        recent_group = defaultdict(list)
+        previous_group = defaultdict(list)
 
-        for item in news_list:
+        for item in recent_news:
 
-            if item.topic_id is None:
-                continue
+            if item.topic_id is not None:
+                recent_group[item.topic_id].append(item)
 
-            grouped[item.topic_id].append(item)
+        for item in previous_news:
 
-        if not grouped:
+            if item.topic_id is not None:
+                previous_group[item.topic_id].append(item)
+
+        if not recent_group:
             return []
 
         max_news = max(
-            len(items)
-            for items in grouped.values()
+            len(v)
+            for v in recent_group.values()
         )
 
         results = []
 
-        for topic_id, items in grouped.items():
+        for topic_id, items in recent_group.items():
 
             news_count = len(items)
+
+            previous_count = len(
+                previous_group.get(topic_id, [])
+            )
+
+            if previous_count == 0:
+
+                growth = 100.0 if news_count > 0 else 0.0
+
+            else:
+
+                growth = (
+                    (news_count - previous_count)
+                    / previous_count
+                ) * 100
 
             sentiments = [
                 n.sentiment
@@ -47,39 +66,24 @@ class TrendService:
             ]
 
             trend_score = self.score.calculate(
-
                 news_count=news_count,
-
                 max_news=max_news,
-
                 sentiments=sentiments,
-
                 published_dates=published_dates,
-
             )
 
             results.append(
-
                 {
-
                     "topic_id": topic_id,
-
                     "news_count": news_count,
-
-                    "growth_rate": 0,
-
+                    "growth_rate": round(growth, 2),
                     "trend_score": trend_score,
-
                 }
-
             )
 
         results.sort(
-
             key=lambda x: x["trend_score"],
-
             reverse=True,
-
         )
 
         return results

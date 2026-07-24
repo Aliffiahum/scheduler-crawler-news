@@ -11,21 +11,35 @@ class TrendScore:
 
         max_news,
 
+        growth_rate,
+
         sentiments,
 
         published_dates,
 
     ):
 
-        # ============================
-        # Volume Score
-        # ============================
+        # ==================================
+        # Volume
+        # ==================================
 
-        volume_score = news_count / max_news
+        if max_news == 0:
+            volume_score = 0
+        else:
+            volume_score = news_count / max_news
 
-        # ============================
-        # Sentiment Score
-        # ============================
+        # ==================================
+        # Growth
+        # ==================================
+
+        growth_score = min(
+            max(growth_rate, 0),
+            1,
+        )
+
+        # ==================================
+        # Sentiment
+        # ==================================
 
         if sentiments:
 
@@ -45,9 +59,9 @@ class TrendScore:
 
             sentiment_score = 0.5
 
-        # ============================
-        # Freshness Score
-        # ============================
+        # ==================================
+        # Freshness
+        # ==================================
 
         if published_dates:
 
@@ -65,7 +79,7 @@ class TrendScore:
 
                 0,
 
-                1 - hours / 72,
+                1 - (hours / 72),
 
             )
 
@@ -73,15 +87,16 @@ class TrendScore:
 
             freshness_score = 0
 
-        # ============================
+        # ==================================
         # Final Score
-        # ============================
+        # ==================================
 
         final_score = (
 
-            volume_score * 0.5
-            + sentiment_score * 0.2
-            + freshness_score * 0.3
+            volume_score * 0.35
+            + growth_score * 0.35
+            + sentiment_score * 0.10
+            + freshness_score * 0.20
 
         )
 

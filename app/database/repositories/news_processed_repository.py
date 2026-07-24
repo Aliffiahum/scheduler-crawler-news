@@ -1,3 +1,5 @@
+import datetime
+
 from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 
@@ -11,9 +13,7 @@ class NewsProcessedRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    # =====================================================
     # BASE QUERY
-    # =====================================================
 
     def base_query(self):
 
@@ -36,9 +36,7 @@ class NewsProcessedRepository:
 
         )
 
-    # =====================================================
     # CREATE
-    # =====================================================
 
     def create_processed_news(
 
@@ -74,9 +72,7 @@ class NewsProcessedRepository:
 
         return news
 
-    # =====================================================
     # EXISTS
-    # =====================================================
 
     def exists(
 
@@ -102,9 +98,7 @@ class NewsProcessedRepository:
 
         )
 
-    # =====================================================
     # SEARCH
-    # =====================================================
 
     def search(
 
@@ -178,9 +172,7 @@ class NewsProcessedRepository:
 
         )
 
-    # =====================================================
     # GET ALL
-    # =====================================================
 
     def get_all_processed(self):
 
@@ -198,9 +190,7 @@ class NewsProcessedRepository:
 
         )
 
-    # =====================================================
     # COUNT
-    # =====================================================
 
     def count(
 
@@ -254,9 +244,7 @@ class NewsProcessedRepository:
 
         return query.scalar()
 
-    # =====================================================
     # CATEGORY
-    # =====================================================
 
     def categories(self):
 
@@ -290,9 +278,7 @@ class NewsProcessedRepository:
 
         ]
 
-    # =====================================================
     # SENTIMENT
-    # =====================================================
 
     def sentiments(self):
 
@@ -326,9 +312,7 @@ class NewsProcessedRepository:
 
         ]
 
-    # =====================================================
     # UNPROCESSED SENTIMENT
-    # =====================================================
 
     def get_unprocessed_sentiment(self):
 
@@ -346,9 +330,7 @@ class NewsProcessedRepository:
 
         )
 
-    # =====================================================
     # UPDATE SENTIMENT
-    # =====================================================
 
     def update_sentiment(
 
@@ -384,9 +366,7 @@ class NewsProcessedRepository:
 
             self.db.commit()
 
-    # =====================================================
     # UNPROCESSED TOPIC
-    # =====================================================
 
     def get_unprocessed_topic(self):
 
@@ -404,17 +384,15 @@ class NewsProcessedRepository:
 
         )
 
-    # =====================================================
     # UPDATE TOPIC
-    # =====================================================
 
     def update_topic(
 
-        self,
+    self,
 
-        raw_news_id,
+    raw_news_id,
 
-        topic_id,
+    topic_id,
 
     ):
 
@@ -436,11 +414,9 @@ class NewsProcessedRepository:
 
             news.topic_id = topic_id
 
-            self.db.commit()
+        return news
 
-    # =====================================================
     # STATISTICS
-    # =====================================================
 
     def sentiment_statistics(self):
 
@@ -498,6 +474,47 @@ class NewsProcessedRepository:
 
                 Topic.label
 
+            )
+
+            .all()
+
+        )
+    
+    # RECENT NEWS
+
+    def get_recent_processed(self, days=7):
+
+        start_date = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=days)
+
+        return (
+
+            self.base_query()
+
+            .filter(
+                NewsProcessed.topic_id.isnot(None),
+                NewsRaw.published_at >= start_date,
+            )
+
+            .all()
+
+        )
+
+    # PREVIOUS NEWS
+
+    def get_previous_processed(self, start_days=14, end_days=7):
+
+        end_date = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=end_days)
+
+        start_date = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=start_days)
+
+        return (
+
+            self.base_query()
+
+            .filter(
+                NewsProcessed.topic_id.isnot(None),
+                NewsRaw.published_at >= start_date,
+                NewsRaw.published_at < end_date,
             )
 
             .all()

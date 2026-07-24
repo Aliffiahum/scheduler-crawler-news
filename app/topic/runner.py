@@ -30,7 +30,7 @@ class TopicRunner:
         print("TOPIC MODELING")
         print("=" * 60)
 
-        news_list = self.news_repository.get_all_processed()
+        news_list = self.news_repository.get_recent_processed(days=7)
 
         if len(news_list) == 0:
 
@@ -151,23 +151,37 @@ class TopicRunner:
             if topic_number == -1:
 
                 self.news_repository.update_topic(
+
                     news.raw_news_id,
+
                     other_topic.id,
+
                 )
 
                 continue
 
             topic = self.topic_repository.get_by_bertopic_id(
+
                 topic_number
+
             )
 
             if topic is None:
                 continue
 
             self.news_repository.update_topic(
+
                 news.raw_news_id,
+
                 topic.id,
+
             )
+
+        # ==========================================
+        # COMMIT SEKALI
+        # ==========================================
+
+        self.db.commit()
 
         print()
 
