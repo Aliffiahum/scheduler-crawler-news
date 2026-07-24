@@ -66,10 +66,11 @@ class TrendService:
             ]
 
             trend_score = self.score.calculate(
-                news_count=news_count,
-                max_news=max_news,
-                sentiments=sentiments,
-                published_dates=published_dates,
+            news_count=news_count,
+            max_news=max_news,
+            sentiments=sentiments,
+            published_dates=published_dates,
+            growth_rate=growth,
             )
 
             results.append(
