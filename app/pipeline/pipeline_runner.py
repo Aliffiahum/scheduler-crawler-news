@@ -19,18 +19,36 @@ class PipelineRunner:
         finally:
             db.close()
 
+    def collector(self):
+        self.run_stage(CollectorRunner)
+
+    def preprocessing(self):
+        self.run_stage(PreprocessingRunner)
+
+    def sentiment(self):
+        self.run_stage(SentimentRunner)
+
+    def topic(self):
+        self.run_stage(TopicRunner)
+
+    def trend(self):
+        self.run_stage(TrendRunner)
+
+    def recommendation(self):
+        self.run_stage(RecommendationRunner)
+
     def run(self):
 
         print("=" * 70)
         print("EDITORIAL INSIGHT AI PIPELINE")
         print("=" * 70)
 
-        self.run_stage(CollectorRunner)
-        self.run_stage(PreprocessingRunner)
-        self.run_stage(SentimentRunner)
-        self.run_stage(TopicRunner)
-        self.run_stage(TrendRunner)
-        self.run_stage(RecommendationRunner)
+        self.collector()
+        self.preprocessing()
+        self.sentiment()
+        self.topic()
+        self.trend()
+        self.recommendation()
 
         print("=" * 70)
         print("PIPELINE SELESAI")

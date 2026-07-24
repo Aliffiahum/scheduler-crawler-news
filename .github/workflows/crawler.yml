@@ -1,24 +1,21 @@
-name: Editorial Insight AI Pipeline
+name: Editorial Insight AI - Crawler
 
 on:
   schedule:
-    # setiap 3 jam
-    - cron: "0 */3 * * *"
+    - cron: "0 * * * *"
 
   workflow_dispatch:
 
 jobs:
-  pipeline:
+  crawler:
 
     runs-on: ubuntu-latest
 
     steps:
 
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
@@ -27,10 +24,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run Pipeline
+      - name: Run Crawler Pipeline
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           SENTIMENT_MODEL: ${{ secrets.SENTIMENT_MODEL }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
         run: |
-          python -m app.pipeline.run_pipeline
+          python -m app.pipeline.run_crawler_pipeline
